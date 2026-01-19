@@ -1,7 +1,5 @@
-//seat layout
-
-
 import 'package:flutter/material.dart';
+import 'passenger_details_page.dart';
 
 class SeatLayoutPage extends StatefulWidget {
   final Map<String, dynamic> busDetails;
@@ -13,102 +11,168 @@ class SeatLayoutPage extends StatefulWidget {
 }
 
 class _SeatLayoutPageState extends State<SeatLayoutPage> {
-  int? selectedSeat;
+  final int seatPrice = 123;
+  final int rows = 10;
 
-  // -1 = Sold, 0 = Aisle gap, 1 = Available
-  // Layout: 2 seats left | 1 aisle | 3 seats right
-  List<List<int>> seatMatrix = [
-    [0, 0, 0, 0, 0, -1],  // Row 0 (Driver side)
-    [1, 0, 0, 1, 1, 1],  // Row 1
-    [1, 1, 0, 1, 1, 1],   // Row 2
-    [1, 1, 0, 1, 1, 1],   // Row 3
-    [1, 1, 0, 1, 1, 1],   // Row 4
-    [1, 1, 0, 1, 1, 1],  // Row 5
-    [1, 1, 0, 1, 1, 1],  // Row 6
-    [1, 1, 0, 1, 1, 1],   // Row 7
-    [1, 1, 0, 1, 1, 1],   // Row 8
-    [1, 1, 0, 1, 1, 1],   // Row 9
-    [0, 0, 0, 1, 1, 1],  // Row 11
-    [1, 1, 0, 1, 1, 1],   // Row 12
-    [1, 1, 1, 1, 1, 1],   // Last row (full 6 seats)
-  ];
+  // 2 + 3 layout = 5 seats per row
+  late List<List<bool>> selected;
 
-  Widget seatBox(int seatNo, int state) {
-    bool isSold = state == -1;
-    bool isGap = state == 0;
-    bool isSelected = selectedSeat == seatNo;
+  @override
+  void initState() {
+    super.initState();
+    selected = List.generate(rows, (_) => List.generate(5, (_) => false));
+  }
 
-    // Aisle gap
-    if (isGap) {
-      return const SizedBox(width: 50);
+  int get totalPrice =>
+      selected.expand((row) => row).where((s) => s).length * seatPrice;
+
+  List<String> get selectedSeats {
+    List<String> seats = [];
+    for (int r = 0; r < rows; r++) {
+      for (int c = 0; c < 5; c++) {
+        if (selected[r][c]) {
+          seats.add("${r + 1}${String.fromCharCode(65 + c)}");
+        }
+      }
     }
+    return seats;
+  }
+
+  Widget seatBox(int r, int c) {
+    bool isSelected = selected[r][c];
 
     return GestureDetector(
-      onTap: isSold
-          ? null
-          : () {
-              setState(() {
-                selectedSeat = seatNo;
-              });
-            },
+      onTap: () {
+        setState(() {
+          selected[r][c] = !selected[r][c];
+        });
+      },
       child: Container(
-        height: 50,
+        margin: const EdgeInsets.all(6),
         width: 50,
+        height: 50,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: isSold ? Colors.grey.shade300 : Colors.white,
-          borderRadius: BorderRadius.circular(6),
-          border: Border.all(
-            color: isSold
-                ? Colors.grey
-                : isSelected
-                    ? Colors.pink
-                    : Colors.green,
-            width: 2,
-          ),
+          color: isSelected ? Colors.green : Colors.white,
+          border: Border.all(color: Colors.green, width: 2),
+          borderRadius: BorderRadius.circular(8),
         ),
         child: Text(
-          "₹${widget.busDetails['price']}",
+          "₹$seatPrice",
           style: TextStyle(
-              color: isSold ? Colors.grey : Colors.black,
-              fontWeight: FontWeight.bold,
-              fontSize: 12),
+            color: isSelected ? Colors.white : Colors.green,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
+    );
+  }
+
+  Widget seatRow(int r) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        // LEFT SIDE (2 seats)
+        seatBox(r, 0),
+        seatBox(r, 1),
+
+        // AISLE GAP
+        const SizedBox(width: 30),
+
+        // RIGHT SIDE (3 seats)
+        seatBox(r, 2),
+        seatBox(r, 3),
+        seatBox(r, 4),
+      ],
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    int seatCounter = 1;
-
     return Scaffold(
       appBar: AppBar(
+        title: const Text("KSRTC Swift"),
         backgroundColor: Colors.green,
-        title: Text("${widget.busDetails['depot']}"),
       ),
 
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(10),
-        child: Column(
-          children: seatMatrix.map((row) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 6),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: row.map((state) {
-                  int thisSeat =
-                      state == 0 ? 0 : seatCounter++; // skip gap seats
+      body: Column(
+        children: [
+          // BUS INFO
+          Container(
+            width: double.infinity,
+            color: Colors.green.shade700,
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: const [
+                Text("AC Seater",
+                    style: TextStyle(color: Colors.white70)),
+                SizedBox(height: 6),
+                Text("06:00 PM → 05:00 AM",
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold)),
+              ],
+            ),
+          ),
 
-                  return seatBox(thisSeat, state);
-                }).toList(),
-              ),
-            );
-          }).toList(),
-        ),
+          // SEATS
+          Expanded(
+            child: ListView.builder(
+              itemCount: rows,
+              itemBuilder: (context, r) => seatRow(r),
+            ),
+          ),
+
+          // BOTTOM BAR
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(color: Colors.black12, blurRadius: 4)
+              ],
+            ),
+            child: Row(
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("₹$totalPrice",
+        
+                        style: const TextStyle(
+                            fontSize: 22, fontWeight: FontWeight.bold)),
+                    Text(
+                      selectedSeats.join(", "),
+                      style: const TextStyle(color: Colors.grey),
+                    ),
+                  ],
+                ),
+                const Spacer(),
+                ElevatedButton(
+                  onPressed: selectedSeats.isEmpty ? null : () {      
+                      Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => PassengerDetailsPage(
+              selectedSeats: selectedSeats,
+            ),
+          ),
+        );},
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 32, vertical: 14),
+                  ),
+                  child: const Text("NEXT",
+                      style: TextStyle(fontSize: 18)),
+                )
+              ],
+            ),
+          )
+        ],
       ),
     );
   }
 }
-
-
