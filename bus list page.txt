@@ -1,0 +1,201 @@
+/bus list page
+
+
+import 'package:flutter/material.dart';
+import 'bus_data.dart';
+import 'seat_layout_page.dart';
+
+class BusListPage extends StatelessWidget {
+  final String fromCity;
+  final String toCity;
+  final String date;
+
+  const BusListPage({
+    super.key,
+    required this.fromCity,
+    required this.toCity,
+    required this.date,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final String routeKey = "$fromCity-$toCity";
+    final List<Map<String, dynamic>> buses = BusData.routes[routeKey] ?? [];
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Available Buses"),
+        backgroundColor: Colors.green,
+      ),
+      body: Column(
+        children: [
+          // HEADER
+          Container(
+            width: double.infinity,
+            color: Colors.green,
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text("Onward Trip",
+                    style: TextStyle(color: Colors.white70)),
+                const SizedBox(height: 5),
+                Text("$fromCity → $toCity",
+                    style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white)),
+                const SizedBox(height: 5),
+                Text(date, style: const TextStyle(color: Colors.white70)),
+              ],
+            ),
+          ),
+
+          // FILTER / SORT ROW
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            color: Colors.grey.shade200,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: const [
+                Row(children: [
+                  Icon(Icons.filter_list),
+                  SizedBox(width: 5),
+                  Text("Filter By"),
+                ]),
+                Row(children: [
+                  Icon(Icons.sort),
+                  SizedBox(width: 5),
+                  Text("Sort By"),
+                ]),
+              ],
+            ),
+          ),
+
+          // BUS LIST
+          Expanded(
+            child: buses.isEmpty
+                ? const Center(
+                    child: Text(
+                      "No buses available for this route",
+                      style: TextStyle(fontSize: 18, color: Colors.grey),
+                    ),
+                  )
+                : ListView.builder(
+                    itemCount: buses.length,
+                    itemBuilder: (context, index) {
+                      final bus = buses[index];
+
+                      return Card(
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 10),
+                        elevation: 3,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(14),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                bus["depot"],
+                                style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                              Text(
+                                bus["type"],
+                                style: const TextStyle(
+                                    color: Colors.green, fontSize: 14),
+                              ),
+                              const SizedBox(height: 10),
+
+                              Row(
+                                children: [
+                                  Text(
+                                    bus["departure"],
+                                    style: const TextStyle(
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 3, horizontal: 6),
+                                    color: Colors.grey.shade300,
+                                    child: Text(bus["duration"]),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Text(
+                                    bus["arrival"],
+                                    style: const TextStyle(
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ],
+                              ),
+
+                              const SizedBox(height: 10),
+
+                              Row(
+                                children: [
+                                  const Icon(Icons.chair),
+                                  Text("  ${bus["seats"]} Seats"),
+                                  const Spacer(),
+                                  Text(
+                                    "₹${bus["price"]}",
+                                    style: const TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.green),
+                                  ),
+                                ],
+                              ),
+
+                              const SizedBox(height: 12),
+
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: OutlinedButton(
+                                      onPressed: () {},
+                                      child: const Text("VIEW MORE"),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: ElevatedButton(
+                                      onPressed: () {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) => SeatLayoutPage(
+        busDetails: bus,   // <-- passing the selected bus
+      ),
+    ),
+  );
+},
+
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.green,
+                                      ),
+                                      child: const Text("SELECT SEAT"),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+

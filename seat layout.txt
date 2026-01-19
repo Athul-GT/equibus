@@ -1,0 +1,114 @@
+//seat layout
+
+
+import 'package:flutter/material.dart';
+
+class SeatLayoutPage extends StatefulWidget {
+  final Map<String, dynamic> busDetails;
+
+  const SeatLayoutPage({super.key, required this.busDetails});
+
+  @override
+  State<SeatLayoutPage> createState() => _SeatLayoutPageState();
+}
+
+class _SeatLayoutPageState extends State<SeatLayoutPage> {
+  int? selectedSeat;
+
+  // -1 = Sold, 0 = Aisle gap, 1 = Available
+  // Layout: 2 seats left | 1 aisle | 3 seats right
+  List<List<int>> seatMatrix = [
+    [0, 0, 0, 0, 0, -1],  // Row 0 (Driver side)
+    [1, 0, 0, 1, 1, 1],  // Row 1
+    [1, 1, 0, 1, 1, 1],   // Row 2
+    [1, 1, 0, 1, 1, 1],   // Row 3
+    [1, 1, 0, 1, 1, 1],   // Row 4
+    [1, 1, 0, 1, 1, 1],  // Row 5
+    [1, 1, 0, 1, 1, 1],  // Row 6
+    [1, 1, 0, 1, 1, 1],   // Row 7
+    [1, 1, 0, 1, 1, 1],   // Row 8
+    [1, 1, 0, 1, 1, 1],   // Row 9
+    [0, 0, 0, 1, 1, 1],  // Row 11
+    [1, 1, 0, 1, 1, 1],   // Row 12
+    [1, 1, 1, 1, 1, 1],   // Last row (full 6 seats)
+  ];
+
+  Widget seatBox(int seatNo, int state) {
+    bool isSold = state == -1;
+    bool isGap = state == 0;
+    bool isSelected = selectedSeat == seatNo;
+
+    // Aisle gap
+    if (isGap) {
+      return const SizedBox(width: 50);
+    }
+
+    return GestureDetector(
+      onTap: isSold
+          ? null
+          : () {
+              setState(() {
+                selectedSeat = seatNo;
+              });
+            },
+      child: Container(
+        height: 50,
+        width: 50,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: isSold ? Colors.grey.shade300 : Colors.white,
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(
+            color: isSold
+                ? Colors.grey
+                : isSelected
+                    ? Colors.pink
+                    : Colors.green,
+            width: 2,
+          ),
+        ),
+        child: Text(
+          "₹${widget.busDetails['price']}",
+          style: TextStyle(
+              color: isSold ? Colors.grey : Colors.black,
+              fontWeight: FontWeight.bold,
+              fontSize: 12),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    int seatCounter = 1;
+
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.green,
+        title: Text("${widget.busDetails['depot']}"),
+      ),
+
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(10),
+        child: Column(
+          children: seatMatrix.map((row) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: row.map((state) {
+                  int thisSeat =
+                      state == 0 ? 0 : seatCounter++; // skip gap seats
+
+                  return seatBox(thisSeat, state);
+                }).toList(),
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+}
+
+

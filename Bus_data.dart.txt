@@ -1,0 +1,53 @@
+//Bus_data.dart
+
+
+class BusData {
+  static final Map<String, List<Map<String, dynamic>>> routes = {
+    "Trivandrum-Bangalore": [
+      {
+        "depot": "KSRTC Swift",
+        "type": "AC Sleeper",
+        "departure": "06:00 PM",
+        "duration": "11 HRS",
+        "arrival": "05:00 AM",
+        "price": 1200,
+        "seats": 18,
+      },
+      {
+        "depot": "KSRTC Fast Passenger",
+        "type": "Non AC Seater",
+        "departure": "03:00 PM",
+        "duration": "14 HRS",
+        "arrival": "05:00 AM",
+        "price": 650,
+        "seats": 36,
+      },
+    ],
+
+    "Adimali-Bangalore": [
+      {
+        "depot": "KSRTC Swift",
+        "type": "AC Sleeper",
+        "departure": "07:00 PM",
+        "duration": "10 HRS",
+        "arrival": "05:00 AM",
+        "price": 1000,
+        "seats": 22,
+      },
+    ],
+
+    "Kochi-Chennai": [
+      {
+        "depot": "SRS Travels",
+        "type": "AC Sleeper",
+        "departure": "08:00 PM",
+        "duration": "11 HRS",
+        "arrival": "07:00 AM",
+        "price": 950,
+        "seats": 12,
+      }
+    ],
+  };
+}
+
+

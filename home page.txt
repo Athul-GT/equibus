@@ -1,0 +1,178 @@
+//home page
+
+
+import 'package:flutter/material.dart';
+import 'city_selection_page.dart';
+import 'bus_list_page.dart';
+
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  String fromCity = "Trivandrum";
+  String toCity = "Bangalore";
+  DateTime? selectedDate;
+
+  String get formattedDate {
+    if (selectedDate == null) return "Select Date";
+    return "${selectedDate!.day}-${selectedDate!.month}-${selectedDate!.year}";
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Book Bus Ticket"),
+        centerTitle: true,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            toggleButtons(),
+            const SizedBox(height: 20),
+
+            cityTile(
+              title: "Travelling From",
+              value: fromCity,
+              onTap: () async {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const CitySelectionPage(),
+                  ),
+                );
+                if (result != null) {
+                  setState(() => fromCity = result);
+                }
+              },
+            ),
+
+            cityTile(
+              title: "Going To",
+              value: toCity,
+              onTap: () async {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const CitySelectionPage(),
+                  ),
+                );
+                if (result != null) {
+                  setState(() => toCity = result);
+                }
+              },
+            ),
+
+            cityTile(
+              title: "Journey Date",
+              value: formattedDate,
+              onTap: () async {
+                DateTime? picked = await showDatePicker(
+                  context: context,
+                  initialDate: DateTime.now(),
+                  firstDate: DateTime.now(),
+                  lastDate: DateTime(2030),
+                );
+
+                if (picked != null) {
+                  setState(() {
+                    selectedDate = picked;
+                  });
+                }
+              },
+            ),
+
+            const SizedBox(height: 30),
+
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                style:
+                    ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                onPressed: () {
+                  // ✅ VALIDATIONS
+                  if (fromCity == toCity) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("From and To cities cannot be same"),
+                      ),
+                    );
+                    return;
+                  }
+
+                  if (selectedDate == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("Please select journey date"),
+                      ),
+                    );
+                    return;
+                  }
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => BusListPage(
+                        fromCity: fromCity,
+                        toCity: toCity,
+                        date: formattedDate,
+                      ),
+                    ),
+                  );
+                },
+                child: const Text(
+                  "SEARCH BUSES",
+                  style: TextStyle(fontSize: 18),
+                ),
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget toggleButtons() {
+    return Row(
+      children: [
+        Expanded(
+          child: OutlinedButton(
+            onPressed: () {},
+            style: OutlinedButton.styleFrom(
+              textStyle: const TextStyle(fontSize: 26),
+              side: const BorderSide(color: Colors.red, width: 2),
+              foregroundColor: Colors.red,
+            ),
+            child: const Text("ONE WAY"),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget cityTile({
+    required String title,
+    required String value,
+    required VoidCallback onTap,
+  }) {
+    return Card(
+      child: ListTile(
+        onTap: onTap,
+        title: Text(title),
+        subtitle: Text(
+          value,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        trailing: const Icon(Icons.arrow_forward_ios),
+      ),
+    );
+  }
+}
+
+

@@ -1,0 +1,82 @@
+//city selection page
+
+
+
+
+import 'package:flutter/material.dart';
+
+class CitySelectionPage extends StatefulWidget {
+  const CitySelectionPage({super.key});
+
+  @override
+  State<CitySelectionPage> createState() => _CitySelectionPageState();
+}
+
+class _CitySelectionPageState extends State<CitySelectionPage> {
+  final List<String> cities = [
+    "Idukki",
+    "Adoor",
+    "Alappuzha",
+    "Bangalore",
+    "Ernakulam",
+    "Kochi",
+    "Trivandrum",
+  ];
+
+  String search = "";
+
+  @override
+  Widget build(BuildContext context) {
+    final filteredCities = cities
+        .where((city) =>
+            city.toLowerCase().contains(search.toLowerCase()))
+        .toList();
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Travelling From"),
+      ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: TextField(
+              decoration: const InputDecoration(
+                hintText: "Search Starting City",
+                prefixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(),
+              ),
+              onChanged: (value) {
+                setState(() => search = value);
+              },
+            ),
+          ),
+
+          const Padding(
+            padding: EdgeInsets.all(8),
+            child: Text(
+              "OR SELECT FROM CITY LIST",
+              style: TextStyle(color: Colors.grey),
+            ),
+          ),
+
+          Expanded(
+            child: ListView.builder(
+              itemCount: filteredCities.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text(filteredCities[index]),
+                  onTap: () {
+                    Navigator.pop(context, filteredCities[index]);
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
